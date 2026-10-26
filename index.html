@@ -106,6 +106,18 @@
     .unit-option:hover{border-color:var(--gold);background:#242115}
     .unit-option strong{display:block;color:var(--gold-light);font-family:'Oswald',sans-serif;font-size:20px;text-transform:uppercase;margin-bottom:6px}
     .unit-option span{font-size:12px;color:var(--muted)}
+    .professional-step{display:none}
+    .professional-step.active{display:block}
+    .professional-input{width:100%;background:#171717;border:1px solid var(--line);padding:13px 14px;color:var(--white);font:inherit;margin:8px 0 18px;outline:none}
+    .professional-input:focus{border-color:var(--gold)}
+    .professional-label{display:block;color:var(--gold-light);font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-top:20px}
+    .professional-choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+    .professional-choice{padding:15px;border:1px solid var(--line);background:#191919;color:var(--white);text-align:left;cursor:pointer}
+    .professional-choice.selected{border-color:var(--gold);background:#242115}
+    .professional-choice strong{display:block;color:var(--gold-light);margin-bottom:4px}
+    .professional-choice span{font-size:12px;color:var(--muted)}
+    .unit-back{background:transparent;color:var(--muted);border:0;cursor:pointer;padding:12px 0;margin-right:12px}
+    @media(max-width:520px){.professional-choices{grid-template-columns:1fr}}
     .unit-hint{font-size:11px!important;margin:18px 0 0!important}
     @media(max-width:520px){.unit-dialog{padding:25px 18px}.unit-options{grid-template-columns:1fr}.unit-dialog h2{font-size:28px}}
     .booking-toolbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between;margin-bottom:24px}
@@ -434,14 +446,29 @@
   <div class="unit-modal" id="unitModal" role="dialog" aria-modal="true" aria-labelledby="unitTitle">
     <div class="unit-dialog">
       <button class="unit-close" id="unitClose" aria-label="Fechar">×</button>
-      <div class="eyebrow">Agendamento</div>
-      <h2 id="unitTitle">Escolha sua <span class="gold">unidade</span></h2>
-      <p>Selecione a unidade onde deseja ser atendido. Vamos abrir o WhatsApp com a unidade indicada na mensagem.</p>
-      <div class="unit-options">
-        <button class="unit-option" data-unit="Várzea Grande (Cristo Rei)"><strong>Várzea Grande</strong><span>Unidade Cristo Rei ↗</span></button>
-        <button class="unit-option" data-unit="Cuiabá (Goiabeiras)"><strong>Cuiabá</strong><span>Unidade Goiabeiras ↗</span></button>
+      <div id="unitStep">
+        <div class="eyebrow">Etapa 1 de 2</div>
+        <h2 id="unitTitle">Escolha sua <span class="gold">unidade</span></h2>
+        <p>Selecione onde deseja ser atendido para continuar o agendamento.</p>
+        <div class="unit-options">
+          <button class="unit-option" data-unit="Várzea Grande (Cristo Rei)"><strong>Várzea Grande</strong><span>Unidade Cristo Rei ↗</span></button>
+          <button class="unit-option" data-unit="Cuiabá (Goiabeiras)"><strong>Cuiabá</strong><span>Unidade Goiabeiras ↗</span></button>
+        </div>
       </div>
-      <p class="unit-hint">A confirmação do horário é feita diretamente pelo WhatsApp.</p>
+      <div class="professional-step" id="professionalStep">
+        <div class="eyebrow">Etapa 2 de 2</div>
+        <h2>Escolha o <span class="gold">profissional</span></h2>
+        <p>Você pode informar o nome do profissional ou escolher atendimento sem preferência.</p>
+        <div class="professional-choices">
+          <button class="professional-choice selected" type="button" data-professional="Sem preferência"><strong>Sem preferência</strong><span>O primeiro profissional disponível</span></button>
+          <button class="professional-choice" type="button" data-professional="Quero escolher"><strong>Quero escolher</strong><span>Informar o nome do profissional</span></button>
+        </div>
+        <label class="professional-label" for="professionalName">Nome do profissional (opcional)</label>
+        <input class="professional-input" id="professionalName" type="text" placeholder="Digite o nome do profissional">
+        <button class="unit-back" id="backToUnits" type="button">← Voltar para unidades</button>
+        <button class="btn" id="confirmBooking" type="button">Continuar para WhatsApp ↗</button>
+        <p class="unit-hint">A confirmação do horário é feita diretamente pelo WhatsApp.</p>
+      </div>
     </div>
   </div>
 \n  <a class="whatsapp-float" href="https://wa.me/5565999075008?text=Ol%C3%A1%21%20Vim%20pelo%20site%20da%20DEJAVITTES%20BARBEARIA%20e%20gostaria%20de%20agendar%20um%20hor%C3%A1rio." target="_blank" rel="noopener" aria-label="Agendar pelo WhatsApp">
@@ -463,13 +490,46 @@
     unitClose.addEventListener('click',closeUnitModal);
     unitModal.addEventListener('click',event=>{if(event.target===unitModal)closeUnitModal();});
     document.addEventListener('keydown',event=>{if(event.key==='Escape')closeUnitModal();});
+    let selectedUnit='';
+    let selectedProfessional='Sem preferência';
+    const unitStep=document.getElementById('unitStep');
+    const professionalStep=document.getElementById('professionalStep');
+    const professionalName=document.getElementById('professionalName');
     unitModal.querySelectorAll('[data-unit]').forEach(button=>{
       button.addEventListener('click',()=>{
-        const unit=button.dataset.unit;
-        const message='Olá! Gostaria de agendar na unidade '+unit+'. '+selectedBookingMessage;
-        window.open('https://wa.me/5565999075008?text='+encodeURIComponent(message),'_blank','noopener');
-        closeUnitModal();
+        selectedUnit=button.dataset.unit;
+        unitStep.style.display='none';
+        professionalStep.classList.add('active');
       });
+    });
+    unitModal.querySelectorAll('[data-professional]').forEach(button=>{
+      button.addEventListener('click',()=>{
+        selectedProfessional=button.dataset.professional;
+        unitModal.querySelectorAll('[data-professional]').forEach(option=>option.classList.toggle('selected',option===button));
+        if(selectedProfessional==='Quero escolher') professionalName.focus();
+      });
+    });
+    document.getElementById('backToUnits').addEventListener('click',()=>{
+      professionalStep.classList.remove('active');
+      unitStep.style.display='block';
+    });
+    document.getElementById('confirmBooking').addEventListener('click',()=>{
+      let professional=selectedProfessional==='Quero escolher'?professionalName.value.trim():selectedProfessional;
+      if(selectedProfessional==='Quero escolher'&&!professional){
+        professionalName.focus();
+        professionalName.setCustomValidity('Digite o nome do profissional ou selecione Sem preferência.');
+        professionalName.reportValidity();
+        return;
+      }
+      professionalName.setCustomValidity('');
+      const message='Olá! Gostaria de agendar na unidade '+selectedUnit+'. Profissional: '+professional+'. '+selectedBookingMessage;
+      window.open('https://wa.me/5565999075008?text='+encodeURIComponent(message),'_blank','noopener');
+      closeUnitModal();
+      professionalStep.classList.remove('active');
+      unitStep.style.display='block';
+      professionalName.value='';
+      selectedProfessional='Sem preferência';
+      unitModal.querySelectorAll('[data-professional]').forEach(option=>option.classList.toggle('selected',option.dataset.professional==='Sem preferência'));
     });
 
     const serviceSearch=document.getElementById('serviceSearch');
