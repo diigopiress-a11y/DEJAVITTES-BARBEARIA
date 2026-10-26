@@ -95,6 +95,19 @@
     .whatsapp-float{position:fixed;right:20px;bottom:20px;z-index:30;width:58px;height:58px;border-radius:50%;background:var(--green);color:#fff;display:grid;place-items:center;box-shadow:0 8px 30px #0008;transition:.2s}
     .whatsapp-float:hover{transform:translateY(-3px) scale(1.04)}
     .whatsapp-float svg{width:29px;height:29px;fill:currentColor}
+    .unit-modal{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.82);backdrop-filter:blur(8px)}
+    .unit-modal.open{display:flex}
+    .unit-dialog{width:min(560px,100%);background:#101010;border:1px solid var(--gold);padding:30px;position:relative;box-shadow:0 25px 80px #000}
+    .unit-dialog h2{font-size:32px;margin:8px 0 10px}
+    .unit-dialog p{color:var(--muted);font-size:14px;margin-bottom:22px}
+    .unit-close{position:absolute;right:14px;top:10px;border:0;background:transparent;color:var(--gold);font-size:28px;cursor:pointer}
+    .unit-options{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .unit-option{display:block;text-align:left;padding:20px;background:#191919;border:1px solid var(--line);color:var(--white);cursor:pointer;transition:.2s}
+    .unit-option:hover{border-color:var(--gold);background:#242115}
+    .unit-option strong{display:block;color:var(--gold-light);font-family:'Oswald',sans-serif;font-size:20px;text-transform:uppercase;margin-bottom:6px}
+    .unit-option span{font-size:12px;color:var(--muted)}
+    .unit-hint{font-size:11px!important;margin:18px 0 0!important}
+    @media(max-width:520px){.unit-dialog{padding:25px 18px}.unit-options{grid-template-columns:1fr}.unit-dialog h2{font-size:28px}}
     .small-note{font-size:11px;color:#777;margin-top:18px}
     @media(max-width:900px){.nav-links{gap:14px}.nav-links a{font-size:12px}.nav>.btn{display:none}.hero{min-height:590px}.service-grid{grid-template-columns:repeat(2,1fr)}.kids,.about-grid{gap:32px}.gallery-grid{grid-template-rows:180px 180px}}
     @media(max-width:680px){.container{width:min(100% - 32px,540px)}.nav{height:72px}.brand-name{font-size:19px}.brand-mark{width:36px;height:36px}.menu-toggle{display:block}.nav-links{display:none;position:absolute;top:72px;left:0;right:0;padding:20px 24px 24px;background:#0a0a0a;border-bottom:1px solid var(--line);flex-direction:column;align-items:stretch;gap:0}.nav-links.open{display:flex}.nav-links a{padding:12px 0;border-bottom:1px solid #ffffff0d;font-size:14px}.nav-links .mobile-cta{display:block;margin-top:14px;text-align:center;background:var(--gold);color:#111;padding:12px}.hero{min-height:620px;background-position:60% center}.hero-content{padding:75px 0 100px}h1{font-size:54px}.hero p{font-size:14px}.section{padding:68px 0}.service-grid{grid-template-columns:1fr}.service-card{min-height:0;padding:24px}.service-icon{margin-bottom:14px}.kids,.about-grid,.contact-grid{grid-template-columns:1fr}.kids-image{min-height:0;margin:0 8px 10px 0}.kids-image img{height:300px}.about-photo{height:280px;order:2}.about-copy{order:1}.gallery-grid{grid-template-columns:1fr 1fr;grid-template-rows:180px 150px 150px}.gallery-grid a:first-child{grid-row:span 2}.gallery-grid a:last-child{grid-column:span 2}.cta-inner{align-items:flex-start;flex-direction:column}.footer-inner{align-items:flex-start;flex-direction:column}.footer-links{flex-wrap:wrap;gap:14px}.whatsapp-float{width:54px;height:54px;right:14px;bottom:14px}}
@@ -223,10 +236,46 @@
     </div>
   </footer>
 
-  <a class="whatsapp-float" href="https://wa.me/556593260852?text=Ol%C3%A1%21%20Vim%20pelo%20site%20da%20DEJAVITTES%20BARBEARIA%20e%20gostaria%20de%20agendar%20um%20hor%C3%A1rio." target="_blank" rel="noopener" aria-label="Agendar pelo WhatsApp">
+  <div class="unit-modal" id="unitModal" role="dialog" aria-modal="true" aria-labelledby="unitTitle">
+    <div class="unit-dialog">
+      <button class="unit-close" id="unitClose" aria-label="Fechar">×</button>
+      <div class="eyebrow">Agendamento</div>
+      <h2 id="unitTitle">Escolha sua <span class="gold">unidade</span></h2>
+      <p>Selecione a unidade onde deseja ser atendido. Vamos abrir o WhatsApp com a unidade indicada na mensagem.</p>
+      <div class="unit-options">
+        <button class="unit-option" data-unit="Várzea Grande (Cristo Rei)"><strong>Várzea Grande</strong><span>Unidade Cristo Rei ↗</span></button>
+        <button class="unit-option" data-unit="Cuiabá (Goiabeiras)"><strong>Cuiabá</strong><span>Unidade Goiabeiras ↗</span></button>
+      </div>
+      <p class="unit-hint">A confirmação do horário é feita diretamente pelo WhatsApp.</p>
+    </div>
+  </div>
+\n  <a class="whatsapp-float" href="https://wa.me/556593260852?text=Ol%C3%A1%21%20Vim%20pelo%20site%20da%20DEJAVITTES%20BARBEARIA%20e%20gostaria%20de%20agendar%20um%20hor%C3%A1rio." target="_blank" rel="noopener" aria-label="Agendar pelo WhatsApp">
     <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16.04 3C8.87 3 3.04 8.78 3.04 15.9c0 2.27.6 4.48 1.75 6.42L3 29l6.88-1.79a13.1 13.1 0 0 0 6.16 1.55h.01c7.16 0 13-5.79 13-12.9A12.83 12.83 0 0 0 16.04 3zm0 23.58c-1.92 0-3.8-.51-5.43-1.48l-.39-.23-4.08 1.06 1.09-3.96-.25-.4a10.66 10.66 0 0 1-1.64-5.67c0-5.89 4.82-10.68 10.71-10.68 2.85 0 5.53 1.11 7.54 3.12a10.57 10.57 0 0 1 3.13 7.55c0 5.89-4.8 10.69-10.68 10.69zm5.87-8.01c-.32-.16-1.91-.94-2.21-1.05-.3-.11-.51-.16-.72.16-.21.32-.83 1.05-1.02 1.26-.19.21-.38.24-.7.08-.32-.16-1.35-.5-2.57-1.59-.95-.84-1.59-1.88-1.78-2.2-.19-.32-.02-.49.14-.65.14-.14.32-.38.48-.57.16-.19.21-.32.32-.54.11-.21.05-.4-.03-.57-.08-.16-.72-1.73-.99-2.37-.26-.62-.53-.54-.72-.55h-.62c-.21 0-.56.08-.86.4-.3.32-1.13 1.1-1.13 2.67s1.16 3.1 1.32 3.31c.16.21 2.28 3.47 5.52 4.86.77.33 1.37.53 1.84.68.77.24 1.47.21 2.02.13.62-.09 1.91-.78 2.18-1.53.27-.75.27-1.4.19-1.53-.08-.13-.29-.21-.62-.38z"/></svg>
   </a>
   <script>
+    const unitModal=document.getElementById('unitModal');
+    const unitClose=document.getElementById('unitClose');
+    let selectedBookingMessage='Olá! Vim pelo site da DEJAVITTES BARBEARIA e gostaria de agendar um horário.';
+    document.querySelectorAll('a[href*="wa.me/556593260852"]').forEach(link=>{
+      link.addEventListener('click',event=>{
+        event.preventDefault();
+        const url=new URL(link.href);
+        selectedBookingMessage=url.searchParams.get('text')||'Olá! Gostaria de agendar um horário.';
+        unitModal.classList.add('open');
+      });
+    });
+    function closeUnitModal(){unitModal.classList.remove('open');}
+    unitClose.addEventListener('click',closeUnitModal);
+    unitModal.addEventListener('click',event=>{if(event.target===unitModal)closeUnitModal();});
+    document.addEventListener('keydown',event=>{if(event.key==='Escape')closeUnitModal();});
+    unitModal.querySelectorAll('[data-unit]').forEach(button=>{
+      button.addEventListener('click',()=>{
+        const unit=button.dataset.unit;
+        const message='Olá! Gostaria de agendar na unidade '+unit+'. '+selectedBookingMessage;
+        window.open('https://wa.me/556593260852?text='+encodeURIComponent(message),'_blank','noopener');
+        closeUnitModal();
+      });
+    });
     const toggle=document.getElementById('menuToggle');
     const links=document.getElementById('navLinks');
     toggle.addEventListener('click',()=>{const open=links.classList.toggle('open');toggle.setAttribute('aria-expanded',String(open));toggle.textContent=open?'×':'☰';});
