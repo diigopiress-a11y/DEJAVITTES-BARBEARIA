@@ -106,6 +106,16 @@
     .unit-option:hover{border-color:var(--gold);background:#242115}
     .unit-option strong{display:block;color:var(--gold-light);font-family:'Oswald',sans-serif;font-size:20px;text-transform:uppercase;margin-bottom:6px}
     .unit-option span{font-size:12px;color:var(--muted)}
+    .time-step{display:none}
+    .time-step.active{display:block}
+    .time-slots{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:18px 0}
+    .time-slot{border:1px solid var(--line);background:#191919;color:var(--white);padding:12px 6px;cursor:pointer;font:inherit;font-size:14px}
+    .time-slot:hover,.time-slot.selected{border-color:var(--gold);background:#2a2414;color:var(--gold-light)}
+    .time-slot.selected{box-shadow:inset 0 0 0 1px var(--gold)}
+    .time-navigation{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:16px}
+    .time-date{background:#171717;border:1px solid var(--line);color:var(--white);padding:12px;font:inherit;width:100%;margin:10px 0}
+    .time-note{font-size:12px;color:var(--muted);margin-top:12px}
+    @media(max-width:520px){.time-slots{grid-template-columns:repeat(3,minmax(0,1fr))}}
     .professional-step{display:none}
     .professional-step.active{display:block}
     .professional-input{width:100%;background:#171717;border:1px solid var(--line);padding:13px 14px;color:var(--white);font:inherit;margin:8px 0 18px;outline:none}
@@ -466,8 +476,20 @@
         <label class="professional-label" for="professionalName">Nome do profissional (opcional)</label>
         <input class="professional-input" id="professionalName" type="text" placeholder="Digite o nome do profissional">
         <button class="unit-back" id="backToUnits" type="button">← Voltar para unidades</button>
-        <button class="btn" id="confirmBooking" type="button">Continuar para WhatsApp ↗</button>
-        <p class="unit-hint">A confirmação do horário é feita diretamente pelo WhatsApp.</p>
+        <button class="btn" id="continueToTime" type="button">Escolher horário ↗</button>
+      </div>
+      <div class="time-step" id="timeStep">
+        <div class="eyebrow">Etapa 3 de 3</div>
+        <h2>Escolha o <span class="gold">horário</span></h2>
+        <p>Selecione a data e um dos horários disponíveis para solicitar seu agendamento.</p>
+        <label class="professional-label" for="bookingDate">Data desejada</label>
+        <input class="time-date" id="bookingDate" type="date">
+        <div class="time-slots" id="timeSlots"></div>
+        <div class="time-navigation">
+          <button class="unit-back" id="backToProfessional" type="button">← Voltar</button>
+          <button class="btn" id="confirmBooking" type="button">Solicitar pelo WhatsApp ↗</button>
+        </div>
+        <p class="time-note">Os horários são opções para solicitar. A disponibilidade será confirmada pela barbearia no WhatsApp.</p>
       </div>
     </div>
   </div>
@@ -509,26 +531,53 @@
         if(selectedProfessional==='Quero escolher') professionalName.focus();
       });
     });
+    const timeStep=document.getElementById('timeStep');
+    const bookingDate=document.getElementById('bookingDate');
+    const timeSlots=document.getElementById('timeSlots');
+    let selectedTime='';
+    const availableTimes=['13:20','13:30','13:40','13:50','14:00','14:10','14:20','14:30','14:40','14:50','15:00','15:10','15:20','15:30','15:40','15:50','16:00','16:10','16:20','16:30','16:40','16:50','17:00','17:10','17:20','17:30','17:40','17:50','18:00','18:10','18:20','18:30','18:40'];
+    timeSlots.innerHTML=availableTimes.map(time=>'<button type="button" class="time-slot" data-time="'+time+'">'+time+'</button>').join('');
+    const today=new Date();
+    const localDate=new Date(today.getTime()-today.getTimezoneOffset()*60000).toISOString().slice(0,10);
+    bookingDate.min=localDate;
+    document.getElementById('continueToTime').addEventListener('click',()=>{
+      let professional=selectedProfessional==='Quero escolher'?professionalName.value.trim():selectedProfessional;
+      if(selectedProfessional==='Quero escolher'&&!professional){
+        professionalName.setCustomValidity('Digite o nome do profissional ou selecione Sem preferência.');
+        professionalName.reportValidity();
+        professionalName.focus();
+        return;
+      }
+      professionalName.setCustomValidity('');
+      professionalStep.classList.remove('active');
+      timeStep.classList.add('active');
+    });
     document.getElementById('backToUnits').addEventListener('click',()=>{
       professionalStep.classList.remove('active');
       unitStep.style.display='block';
     });
+    document.getElementById('backToProfessional').addEventListener('click',()=>{
+      timeStep.classList.remove('active');
+      professionalStep.classList.add('active');
+    });
+    timeSlots.querySelectorAll('[data-time]').forEach(button=>{
+      button.addEventListener('click',()=>{
+        selectedTime=button.dataset.time;
+        timeSlots.querySelectorAll('[data-time]').forEach(slot=>slot.classList.toggle('selected',slot===button));
+      });
+    });
     document.getElementById('confirmBooking').addEventListener('click',()=>{
+      const date=bookingDate.value;
+      if(!date){bookingDate.setCustomValidity('Selecione a data desejada.');bookingDate.reportValidity();bookingDate.focus();return;}
+      bookingDate.setCustomValidity('');
+      if(!selectedTime){alert('Selecione um horário para continuar.');return;}
       let professional=selectedProfessional==='Quero escolher'?professionalName.value.trim():selectedProfessional;
-      if(selectedProfessional==='Quero escolher'&&!professional){
-        professionalName.focus();
-        professionalName.setCustomValidity('Digite o nome do profissional ou selecione Sem preferência.');
-        professionalName.reportValidity();
-        return;
-      }
-      professionalName.setCustomValidity('');
-      const message='Olá! Gostaria de agendar na unidade '+selectedUnit+'. Profissional: '+professional+'. '+selectedBookingMessage;
+      const message='Olá! Gostaria de solicitar um agendamento. Unidade: '+selectedUnit+'. Profissional: '+professional+'. Data: '+date+'. Horário desejado: '+selectedTime+'. '+selectedBookingMessage+' Poderiam confirmar a disponibilidade, por favor?';
       window.open('https://wa.me/5565999075008?text='+encodeURIComponent(message),'_blank','noopener');
       closeUnitModal();
-      professionalStep.classList.remove('active');
-      unitStep.style.display='block';
-      professionalName.value='';
-      selectedProfessional='Sem preferência';
+      professionalStep.classList.remove('active');timeStep.classList.remove('active');unitStep.style.display='block';
+      professionalName.value='';selectedProfessional='Sem preferência';selectedTime='';bookingDate.value='';
+      timeSlots.querySelectorAll('[data-time]').forEach(slot=>slot.classList.remove('selected'));
       unitModal.querySelectorAll('[data-professional]').forEach(option=>option.classList.toggle('selected',option.dataset.professional==='Sem preferência'));
     });
 
