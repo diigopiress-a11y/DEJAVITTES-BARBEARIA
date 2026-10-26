@@ -577,7 +577,18 @@
       bookingDate.setCustomValidity('');
       if(!selectedTime){alert('Selecione um horário para continuar.');return;}
       let professional=selectedProfessional==='Quero escolher'?professionalName.value.trim():selectedProfessional;
-      const message='Olá! Gostaria de solicitar um agendamento. Unidade: '+selectedUnit+'. Profissional: '+professional+'. Data: '+date+'. Horário desejado: '+selectedTime+'. '+selectedBookingMessage+' Poderiam confirmar a disponibilidade, por favor?';
+      const serviceDetails=selectedBookingMessage.replace(/^Olá! Gostaria de agendar o serviço: /,'').replace(/\\. Poderiam confirmar.*$/,'');
+      const message='💈 *DEJAVITTES BARBEARIA*\\n' +
+        '━━━━━━━━━━━━━━━━━━\\n' +
+        '📅 *SOLICITAÇÃO DE AGENDAMENTO*\\n\\n' +
+        '✂️ *Serviço:* '+serviceDetails+'\\n' +
+        '📍 *Unidade:* '+selectedUnit+'\\n' +
+        '👤 *Profissional:* '+professional+'\\n' +
+        '🗓️ *Data:* '+date+'\\n' +
+        '🕒 *Horário desejado:* '+selectedTime+'\\n\\n' +
+        '━━━━━━━━━━━━━━━━━━\\n' +
+        'Olá! Gostaria de confirmar esse agendamento. Poderiam verificar a disponibilidade, por favor?\\n\\n' +
+        'Obrigado(a)!';
       window.open('https://wa.me/5565993073067?text='+encodeURIComponent(message),'_blank','noopener');
       closeUnitModal();
       professionalStep.classList.remove('active');timeStep.classList.remove('active');unitStep.style.display='block';
